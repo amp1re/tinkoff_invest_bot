@@ -1,0 +1,25 @@
+name: formatter
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install isort black pylint mypy pandas pytest
+    - name: Run isort
+      run: isort .
+    - name: Run black
+      run: black .
+    - name: Run pylint
+      run: pylint --disable=C0301,W0221 tinkoff_invest_bot
+    - name: Run mypy
+      run: mypy .
