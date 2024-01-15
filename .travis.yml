@@ -3,7 +3,6 @@
 language: python
 python:
   - 3.9
-  - 3.10
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox-travis
@@ -20,7 +19,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: amp1re
   password:
-    secure: $PYPI_PASSWORD
+    secure: "$PYPI_PASSWORD"
   on:
     tags: true
     repo: amp1re/tinkoff_invest_bot
