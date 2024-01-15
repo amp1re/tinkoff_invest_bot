@@ -20,7 +20,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: amp1re
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: $PYPI_PASSWORD
   on:
     tags: true
     repo: amp1re/tinkoff_invest_bot
