@@ -19,6 +19,8 @@
 #
 import os
 import sys
+from typing import Dict
+
 sys.path.insert(0, os.path.abspath('../tinkoff_invest_bot'))
 
 import tinkoff_invest_bot
@@ -105,7 +107,7 @@ htmlhelp_basename = 'tinkoff_invest_botdoc'
 
 # -- Options for LaTeX output ------------------------------------------
 
-latex_elements = {
+latex_elements: Dict['str', 'str'] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
