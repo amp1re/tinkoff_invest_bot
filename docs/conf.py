@@ -21,10 +21,11 @@ import os
 import sys
 from typing import Dict
 
-sys.path.insert(0, os.path.abspath('./tinkoff_invest_bot'))
+sys.path.insert(0, os.path.abspath('../tinkoff_invest_bot'))
 
 import tinkoff_invest_bot
 
+print(1)
 # -- General configuration ---------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
