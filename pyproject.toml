@@ -66,4 +66,4 @@ disable = [
 
 [tool.mypy]
 files = ["tinkoff_invest_bot", "tests"]
-ignore_missing_imports = True
+ignore_missing_imports = true
