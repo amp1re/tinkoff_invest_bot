@@ -14,7 +14,7 @@ repos:
     rev: v3.0.1
     hooks:
       - id: pylint
-        additional_dependencies: [pylint, pandas, pytest]
+        additional_dependencies: [pylint, pandas, pytest, requests, bs4]
         args: ['--disable=C0301,W0221']
 
   - repo: https://github.com/pre-commit/mirrors-mypy

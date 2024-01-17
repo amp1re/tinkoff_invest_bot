@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install isort black pylint mypy pandas pytest
+        pip install isort black pylint mypy pandas pytest requests bs4
     - name: Run isort
       run: isort .
     - name: Run black
