@@ -14,8 +14,6 @@ with open('HISTORY.rst') as history_file:
 with open("requirements_dev.txt", encoding="utf-8") as requirements_file:
     requirements = test_requirements = requirements_file.read().splitlines()
 
-test_requirements = ['pytest>=3', ]
-
 setup(
     author="Nikita Toloknov",
     author_email='4170407@gmail.com',
