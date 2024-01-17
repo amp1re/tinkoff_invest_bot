@@ -6,8 +6,8 @@ tinkoff_invest_bot
 .. image:: https://img.shields.io/pypi/v/tinkoff_invest_bot.svg
         :target: https://pypi.python.org/pypi/tinkoff_invest_bot
 
-.. image:: https://img.shields.io/travis/amp1re/tinkoff_invest_bot.svg
-        :target: https://travis-ci.com/amp1re/tinkoff_invest_bot
+.. image:: https://app.travis-ci.com/amp1re/tinkoff_invest_bot.svg?branch=main
+        :target: https://travis-ci.com/github/amp1re/tinkoff_invest_bot
 
 .. image:: https://readthedocs.org/projects/tinkoff-invest-bot/badge/?version=latest
         :target: https://tinkoff-invest-bot.readthedocs.io/en/latest/?version=latest
