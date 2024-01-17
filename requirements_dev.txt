@@ -14,3 +14,4 @@ black==21.7b0
 setuptools~=69.0.3
 bs4~=0.0.1
 beautifulsoup4~=4.12.2
+requests==2.31.0
