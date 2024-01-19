@@ -33,14 +33,13 @@ class MMVBDataFetcher(IndexDataFetcher):
         Validates and returns a modified pandas DataFrame based on specified trimming parameters.
     """
 
-    def __init__(self, url: str):
+    def __init__(self):
         """
         Parameters
         ----------
         url : str
             The URL of the webpage from which to fetch data.
         """
-        self.url: str = url
         self.html: Optional[str] = None
 
     def fetch_html(self) -> Optional[str]:
@@ -61,7 +60,7 @@ class MMVBDataFetcher(IndexDataFetcher):
                 print(f"Error fetching the webpage: {e}")
         return self.html
 
-    def parse_table(self, table_index: int = 0) -> Optional[pd.DataFrame]:
+    def fetch_index_data(self, url, table_index: int = 0) -> Optional[pd.DataFrame]:
         """
         Parses a table from the fetched HTML content based on the specified index.
 
@@ -75,9 +74,11 @@ class MMVBDataFetcher(IndexDataFetcher):
         Optional[pd.DataFrame]
             DataFrame containing the parsed table data, or None if no table is found or an error occurs.
         """
+        self.url = url
         html = self.fetch_html()
         if html:
             soup = BeautifulSoup(html, "html.parser")
+            self.html = None
             tables = soup.find_all("table")
             if table_index < len(tables):
                 return self.parse_table_data(tables[table_index])
@@ -124,6 +125,7 @@ class MMVBDataFetcher(IndexDataFetcher):
     def validate_data(
         self,
         data: pd.DataFrame,
+        tickers_url: str,
         skip_rows: int = 1,
         skip_start_columns: int = 1,
         skip_end_columns: int = 2,
@@ -160,6 +162,21 @@ class MMVBDataFetcher(IndexDataFetcher):
             data.iloc[skip_rows:, skip_start_columns:-skip_end_columns]
             if skip_end_columns > 0
             else data.iloc[skip_rows:, skip_start_columns:]
+        )
+
+        tickers_data = self.fetch_index_data(tickers_url)
+        validated_data = pd.merge(
+            validated_data,
+            tickers_data[["Название", "Тикер"]],
+            how="left",
+            on="Название",
+        )
+        validated_data = validated_data[["Тикер", "Вес"]]
+        validated_data = validated_data.rename(
+            columns={"Тикер": "ticker", "Вес": "weight"}
+        )
+        validated_data["weight"] = (
+            validated_data["weight"].apply(lambda x: x[:-1]).astype("float")
         )
 
         return validated_data
