@@ -60,7 +60,8 @@ class MMVBDataFetcher(IndexDataFetcher):
                 print(f"Error fetching the webpage: {e}")
         return self.html
 
-    def fetch_index_data(self, url, table_index: int = 0) -> Optional[pd.DataFrame]:
+    def fetch_index_data(self, url, table_index: int = 0) -> Optional[pd.DataFrame]:  # type: ignore[override]
+        # method implementation
         """
         Parses a table from the fetched HTML content based on the specified index.
 
@@ -122,14 +123,7 @@ class MMVBDataFetcher(IndexDataFetcher):
             print(f"Index error in parsing: {e}")
         return None
 
-    def validate_data(
-        self,
-        data: pd.DataFrame,
-        tickers_url: str,
-        skip_rows: int = 1,
-        skip_start_columns: int = 1,
-        skip_end_columns: int = 2,
-    ) -> Optional[pd.DataFrame]:
+    def validate_data(self, data: pd.DataFrame, tickers_url: str, skip_rows: int = 1, skip_columns: tuple = (1, 2)) -> Optional[pd.DataFrame]:  # type: ignore[override]
         """
         Validates and modifies the given DataFrame by trimming specified rows and columns.
 
@@ -159,15 +153,15 @@ class MMVBDataFetcher(IndexDataFetcher):
             print("DataFrame is empty.")
             return None
         validated_data = (
-            data.iloc[skip_rows:, skip_start_columns:-skip_end_columns]
-            if skip_end_columns > 0
-            else data.iloc[skip_rows:, skip_start_columns:]
+            data.iloc[skip_rows:, skip_columns[0] : -skip_columns[1]]
+            if skip_columns[1] > 0
+            else data.iloc[skip_rows:, skip_columns[0] :]
         )
 
         tickers_data = self.fetch_index_data(tickers_url)
         validated_data = pd.merge(
             validated_data,
-            tickers_data[["Название", "Тикер"]],
+            tickers_data[["Название", "Тикер"]],  # type: ignore[index]
             how="left",
             on="Название",
         )

@@ -43,7 +43,7 @@ class IndexDataFetcher(ABC):
 
         Parameters
         ----------
-        data : Any
+        data : pd.DataFrame
             The index data that needs to be validated.
 
         Raises
