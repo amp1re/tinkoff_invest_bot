@@ -58,7 +58,7 @@ author = "Nikita Toloknov"
 # the built documents.
 #
 # The short X.Y version.
-version = tinkoff_invest_bot.__version__
+version = '0.2.0'
 # The full version, including alpha/beta/rc tags.
 release = tinkoff_invest_bot.__version__
 
