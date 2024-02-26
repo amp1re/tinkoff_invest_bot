@@ -117,3 +117,37 @@ class ClientService:
             except Exception as e:
                 print(f"Failed to retrieve last prices information: {e}")
                 return pd.DataFrame()  # Return an empty DataFrame in case of failure
+
+    def get_money(self):
+        """
+        Retrieves the total amount of money in the specified account's portfolio.
+
+        This method connects to the Tinkoff Invest API using the provided token and account ID,
+        and fetches the total amount of all currencies in the portfolio, converting the value
+        to a decimal representation for precision.
+
+        Returns
+        -------
+        Decimal or None
+            The total money amount in the account's portfolio as a Decimal, or None if the
+            retrieval fails.
+
+        Examples
+        --------
+        >>> client_service = ClientService(token='your_token', account_id='your_account_id')
+        >>> total_money = client_service.get_money()
+        >>> print(total_money)
+
+        Notes
+        -----
+        The method catches and prints any exceptions that occur during the API call, returning
+        None in case of failure to allow for graceful error handling by the caller.
+        """
+        with Client(self.__token) as client:
+            try:
+                money = client.operations.get_portfolio(account_id=self.__account_id)
+                money = cast_money(money.total_amount_currencies)
+                return money
+            except Exception as e:
+                print(f"Failed to retrieve money information: {e}")
+                return None

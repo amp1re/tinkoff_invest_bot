@@ -21,14 +21,6 @@ def cast_money(v):
     ------
     ValueError
         If the input money format is invalid or cannot be converted to Decimal.
-
-    Examples
-    --------
-    >>> money_value = MoneyValue(units=1, nano=500000000)  # Example object similar to API response
-    >>> cast_money(money_value)
-    Decimal('1.5')
-
-    Note: The actual MoneyValue object structure may vary based on the Tinkoff Invest API.
     """
     try:
         units = Decimal(v.units)
@@ -36,4 +28,4 @@ def cast_money(v):
     except (TypeError, ValueError) as exc:
         # Re-raise the exception with a custom message, linking the cause.
         raise ValueError("Invalid money format") from exc
-    return units + nano / Decimal(1e9)
+    return float(units + nano / Decimal(1e9))

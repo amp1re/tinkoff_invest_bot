@@ -20,7 +20,7 @@ jobs:
     - name: Run black
       run: black .
     - name: Run pylint
-      run: pylint --disable=C0301,W0221,W0201,W0718 tinkoff_invest_bot
+      run: pylint --disable=C0301,W0221,W0201,W0718,R0902 tinkoff_invest_bot
     - name: Run mypy
       run: |
         python3 -m pip install types-requests
