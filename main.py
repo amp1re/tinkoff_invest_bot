@@ -19,7 +19,7 @@ mmvb_strategy = MMVBStrategy(token=token, account_id=account_id)
 
 # print(mmvb_strategy.search_shares_to_buy())
 
-print(mmvb_strategy.get_portfolio())
+print(mmvb_strategy.search_shares_to_buy())
 
 # client_service = ClientService(token, account_id)
 # # print(client_service.get_positions_info())
