@@ -198,7 +198,7 @@ class MMVBStrategy(MMVBDataFetcher, ClientService):
         )
 
         self.adjusted_tickers = self.portfolio.loc[
-            self.portfolio["to_buy"] is True
+            self.portfolio["to_buy"] == True
         ].copy()
         self.adjusted_tickers["lots_to_buy"] = (
             self.adjusted_tickers["to_buy_rubles"] // self.adjusted_tickers["lot_price"]

@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import List
 
 import pandas as pd
-from tinkoff.invest import Client
+from tinkoff.invest import Client, OrderDirection, OrderType, RequestError
 
 from tinkoff_invest_bot.utils import cast_money
 
@@ -151,3 +152,34 @@ class ClientService:
             except Exception as e:
                 print(f"Failed to retrieve money information: {e}")
                 return None
+
+    def byu_figi(self, figi, lot):
+        """
+        Executes a market buy order for a financial instrument identified by its FIGI.
+
+        Parameters
+        ----------
+        figi : str
+            The FIGI (Financial Instrument Global Identifier) code of the financial instrument to buy.
+        lot : int
+            The number of lots to buy.
+
+        Raises
+        ------
+        RequestError
+            If there is an error in executing the buy order.
+
+        """
+        try:
+            with Client(self.__token) as client:
+                client.orders.post_order(
+                    order_id=str(datetime.utcnow().timestamp()),
+                    figi=figi,
+                    quantity=lot,
+                    account_id=self.__account_id,
+                    direction=OrderDirection.ORDER_DIRECTION_BUY,
+                    order_type=OrderType.ORDER_TYPE_MARKET,
+                )
+
+        except RequestError as e:
+            print(str(e))
