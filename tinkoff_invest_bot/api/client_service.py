@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from typing import List
 
 import pandas as pd
@@ -173,7 +173,7 @@ class ClientService:
         try:
             with Client(self.__token) as client:
                 client.orders.post_order(
-                    order_id=str(datetime.utcnow().timestamp()),
+                    order_id=str(datetime.datetime.utcnow().timestamp()),
                     figi=figi,
                     quantity=lot,
                     account_id=self.__account_id,
@@ -183,3 +183,58 @@ class ClientService:
 
         except RequestError as e:
             print(str(e))
+
+    def __trading_schedules(
+        self, exchange: str, _from: datetime.datetime, _to: datetime.datetime
+    ):
+        """
+        Retrieve trading schedules for a specific exchange within a given time range.
+
+        Parameters
+        ----------
+        exchange : str
+            The name of the exchange.
+        _from : datetime
+            The start date/time for retrieving trading schedules.
+        _to : datetime
+            The end date/time for retrieving trading schedules.
+
+        Returns
+        -------
+        list
+            A list of trading schedules for the specified exchange within the given time range.
+        """
+        result = []
+        with Client(self.__token) as client:
+            try:
+                for schedule in client.instruments.trading_schedules(
+                    exchange=exchange, from_=_from, to=_to
+                ).exchanges:
+                    result.append(schedule)
+            except Exception as e:
+                print(f"Failed to retrieve trading schedules: {e}")
+        return result
+
+    def moex_today_trading_schedule(self):
+        """
+        Retrieves the trading schedule for MOEX for the current day.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the following information:
+            - is_trading_day: bool, indicating if it is a trading day
+            - start_time: datetime, the start time of trading
+            - end_time: datetime, the end time of trading
+
+        """
+        for schedule in self.__trading_schedules(
+            exchange="MOEX",
+            _from=datetime.datetime.utcnow(),
+            _to=datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        ):
+            for day in schedule.days:
+                if day.date.date() == datetime.date.today():
+                    return day.is_trading_day, day.start_time, day.end_time
+
+        return False, datetime.datetime.utcnow(), datetime.datetime.utcnow()
