@@ -1,4 +1,6 @@
 from math import floor
+import time
+import datetime
 
 import pandas as pd
 
@@ -60,10 +62,10 @@ class MMVBStrategy(MMVBDataFetcher, ClientService):
         >>> mmvb_data = strategy.collect_mmvb_weights()
         >>> print(mmvb_data)
         """
-        self.data = self.fetch_index_data(self.url)
-        self.data = self.validate_data(self.data, self.tickers_url)
+        data_mmvb = self.fetch_index_data(self.url)
+        data_mmvb = self.validate_data(data_mmvb, self.tickers_url)
 
-        return self.data
+        return data_mmvb
 
     def collect_portfolio_information(self):
         """
@@ -113,17 +115,17 @@ class MMVBStrategy(MMVBDataFetcher, ClientService):
         >>> combined_info = strategy.collect_information()
         >>> print(combined_info)
         """
-        self.data = self.collect_mmvb_weights()
-        self.positions, self.shares, self.prices = self.collect_portfolio_information()
+        data = self.collect_mmvb_weights()
+        positions, shares, prices = self.collect_portfolio_information()
 
         # Merge MMVB data with shares, positions, and prices for a comprehensive overview
-        self.data = pd.merge(self.data, self.shares, how="left", on="ticker")
-        self.data = pd.merge(self.data, self.positions, how="left", on="figi")
-        self.data = pd.merge(self.data, self.prices, how="left", on="figi")
+        data = pd.merge(data, shares, how="left", on="ticker")
+        data = pd.merge(data, positions, how="left", on="figi")
+        data = pd.merge(data, prices, how="left", on="figi")
 
         # Fill missing balance data with zeros
-        self.data["balance"] = self.data["balance"].fillna(0)
-        return self.data
+        data["balance"] = data["balance"].fillna(0)
+        return data
 
     def get_portfolio(self):
         """
@@ -147,24 +149,24 @@ class MMVBStrategy(MMVBDataFetcher, ClientService):
         >>> portfolio_data = strategy.get_portfolio()
         >>> print(portfolio_data)
         """
-        self.data = self.collect_information()
+        data = self.collect_information()
 
         # Calculate lot price and portfolio volume in rubles
-        self.data["lot_price"] = self.data["price"] * self.data["lot"]
-        self.data["portfolio_rubles_volume"] = self.data["price"] * self.data["balance"]
+        data["lot_price"] = data["price"] * data["lot"]
+        data["portfolio_rubles_volume"] = data["price"] * data["balance"]
 
         # Calculate portfolio weight by volume and ideal portfolio distribution
-        self.data["portfolio_weight_volume"] = (
-            self.data["portfolio_rubles_volume"]
-            / (self.data["portfolio_rubles_volume"].sum() + self.money)
+        data["portfolio_weight_volume"] = (
+            data["portfolio_rubles_volume"]
+            / (data["portfolio_rubles_volume"].sum() + self.money)
         ) * 100
-        self.data["ideal_portfolio"] = (
-            self.data["weight"]
+        data["ideal_portfolio"] = (
+            data["weight"]
             / 100
-            * (self.data["portfolio_rubles_volume"].sum() + self.money)
+            * (data["portfolio_rubles_volume"].sum() + self.money)
         )
 
-        return self.data
+        return data
 
     def search_shares_to_buy(self):
         """
@@ -210,3 +212,107 @@ class MMVBStrategy(MMVBDataFetcher, ClientService):
         )
 
         return self.adjusted_tickers
+
+    def run(self):
+        """
+        Execute the main trading loop.
+
+        This method continuously checks whether the current day is a trading day and if the current
+        time is within the trading hours as defined by the Moscow Exchange (MOEX). If it is a trading day
+        and the current time is within trading hours, the method updates the available money, searches
+        for shares to buy, and attempts to buy them. If no shares are identified for purchase or after
+        attempting to buy shares, the method sleeps until the next day. The method handles exceptions
+        gracefully by printing them and then continues by sleeping until the next day.
+
+        Uses internal methods:
+        - `moex_today_trading_schedule()` to get the trading day status and trading hours for the current day.
+        - `get_money()` to update the available money.
+        - `search_shares_to_buy()` to find shares to buy.
+        - `buy_figi(figi, lot)` to buy a specific share identified by FIGI code and lot size.
+        - `__sleep_to_next_day()` to sleep until 10:00 AM UTC of the next day.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        Exception
+            Captures and prints any exceptions that occur during the execution of the trading loop.
+        """
+        now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+        while True:
+            try:
+                is_trading_day, start_time, end_time = self.moex_today_trading_schedule()
+
+                if is_trading_day and start_time < now < end_time:
+                    print('Trading')
+                    self.money = self.get_money()
+                    self.share_to_buy = self.search_shares_to_buy()
+                    print(self.share_to_buy)
+                    if not self.share_to_buy:
+                        print('No shares to buy')
+                        self.__sleep_to_next_day()
+                    else:
+                        print('Start buy')
+                        for figi, lot in self.share_to_buy.items():
+                            self.buy_figi(figi, lot)
+                            time.sleep(3)
+            except Exception as e:
+                print(e)
+            print('Sleep for next day')
+            self.__sleep_to_next_day()
+
+    def __sleep_to(self, next_time: datetime.datetime):
+        """
+        Sleep until a specified future time.
+
+        This method calculates the total number of seconds until a specified `next_time`
+        and sleeps the current thread for that duration, if the `next_time` is in the future.
+
+        Parameters
+        ----------
+        next_time : datetime.datetime
+            The future time until which the current thread should sleep. It must be timezone-aware
+            and is expected to be in UTC.
+
+        Returns
+        -------
+        None
+        """
+        now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+        total_seconds = (next_time - now).total_seconds()
+        if total_seconds > 0:
+            time.sleep(total_seconds)
+
+    def __sleep_to_next_day(self):
+        """
+        Sleep until 10:00 AM UTC of the next day.
+
+        This method calculates the time until 10:00 AM UTC of the next day from the current
+        UTC time, and sleeps the current thread for that duration.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        future = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        next_time = datetime.datetime(
+            year=future.year,
+            month=future.month,
+            day=future.day,
+            hour=10,
+            minute=0,
+            tzinfo=datetime.timezone.utc,
+        )
+
+        self.__sleep_to(next_time)
+

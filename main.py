@@ -2,6 +2,17 @@ from bestconfig import Config
 
 from tinkoff_invest_bot.strategy.strategies import MMVBStrategy
 
+import os
+
+from loguru import logger
+
+
+
+
+
+
+
+
 # data = parser.fetch_index_data(url)
 # data = parser.validate_data(data, tickers_url)
 # print(data.head(3))
@@ -19,7 +30,9 @@ mmvb_strategy = MMVBStrategy(token=token, account_id=account_id)
 
 # print(mmvb_strategy.search_shares_to_buy())
 
-print(mmvb_strategy.moex_today_trading_schedule())
+
+mmvb_strategy.run()
+
 
 # client_service = ClientService(token, account_id)
 # # print(client_service.get_positions_info())
